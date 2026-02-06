@@ -1,0 +1,71 @@
+{
+  "name": "@safenest/react-native",
+  "version": "1.0.0",
+  "description": "Official React Native SDK for SafeNest - AI-powered child safety API",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "safenest",
+    "react-native",
+    "child-safety",
+    "content-moderation",
+    "bullying-detection",
+    "grooming-detection",
+    "ai",
+    "sdk",
+    "parental-control",
+    "online-safety",
+    "mobile"
+  ],
+  "author": "SafeNest <sales@safenest.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SafeNestSDK/react-native.git"
+  },
+  "homepage": "https://safenest.dev",
+  "bugs": {
+    "url": "https://github.com/SafeNestSDK/react-native/issues"
+  },
+  "dependencies": {
+    "@safenest/sdk": "^1.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-native": ">=0.70.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "react": "^18.2.0",
+    "react-native": "^0.73.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
