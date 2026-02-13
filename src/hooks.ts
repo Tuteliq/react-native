@@ -31,6 +31,23 @@ import {
   BreachResult,
   UpdateBreachInput,
   GetBreachesOptions,
+  AnalyzeVoiceInput,
+  VoiceAnalysisResult,
+  AnalyzeImageInput,
+  ImageAnalysisResult,
+  WebhookListResult,
+  CreateWebhookInput,
+  CreateWebhookResult,
+  UpdateWebhookInput,
+  UpdateWebhookResult,
+  DeleteWebhookResult,
+  TestWebhookResult,
+  RegenerateSecretResult,
+  PricingResult,
+  PricingDetailsResult,
+  UsageHistoryResult,
+  UsageByToolResult,
+  UsageMonthlyResult,
 } from '@tuteliq/sdk';
 import { useTuteliqClient } from './context';
 
@@ -681,6 +698,510 @@ export function useUpdateBreachStatus(): UseAsyncResult<BreachResult, { id: stri
       setState({ data: null, loading: true, error: null });
       try {
         const result = await client.updateBreachStatus(params.id, params.input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Media Analysis Hooks
+// =============================================================================
+
+/**
+ * Hook for voice/audio analysis.
+ *
+ * @example
+ * ```tsx
+ * function VoiceChecker() {
+ *   const { data, loading, error, execute } = useAnalyzeVoice();
+ *
+ *   const handleAnalyze = async (file: File) => {
+ *     const result = await execute({ file, filename: file.name, analysisType: 'all' });
+ *     console.log('Risk score:', result.overall_risk_score);
+ *   };
+ * }
+ * ```
+ */
+export function useAnalyzeVoice(): UseAsyncResult<VoiceAnalysisResult, AnalyzeVoiceInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<VoiceAnalysisResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: AnalyzeVoiceInput): Promise<VoiceAnalysisResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.analyzeVoice(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for image analysis.
+ *
+ * @example
+ * ```tsx
+ * function ImageChecker() {
+ *   const { data, loading, error, execute } = useAnalyzeImage();
+ *
+ *   const handleAnalyze = async (file: File) => {
+ *     const result = await execute({ file, filename: file.name, analysisType: 'all' });
+ *     console.log('Risk score:', result.overall_risk_score);
+ *   };
+ * }
+ * ```
+ */
+export function useAnalyzeImage(): UseAsyncResult<ImageAnalysisResult, AnalyzeImageInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<ImageAnalysisResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: AnalyzeImageInput): Promise<ImageAnalysisResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.analyzeImage(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Webhook Hooks
+// =============================================================================
+
+/**
+ * Hook for listing webhooks.
+ */
+export function useListWebhooks(): Omit<UseAsyncResult<WebhookListResult, void>, 'execute'> & { execute: () => Promise<WebhookListResult> } {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<WebhookListResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (): Promise<WebhookListResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.listWebhooks();
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for creating a webhook.
+ */
+export function useCreateWebhook(): UseAsyncResult<CreateWebhookResult, CreateWebhookInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<CreateWebhookResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: CreateWebhookInput): Promise<CreateWebhookResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.createWebhook(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for updating a webhook.
+ */
+export function useUpdateWebhook(): UseAsyncResult<UpdateWebhookResult, { webhookId: string; input: UpdateWebhookInput }> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<UpdateWebhookResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (params: { webhookId: string; input: UpdateWebhookInput }): Promise<UpdateWebhookResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.updateWebhook(params.webhookId, params.input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for deleting a webhook.
+ */
+export function useDeleteWebhook(): UseAsyncResult<DeleteWebhookResult, string> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DeleteWebhookResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (webhookId: string): Promise<DeleteWebhookResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.deleteWebhook(webhookId);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for testing a webhook.
+ */
+export function useTestWebhook(): UseAsyncResult<TestWebhookResult, string> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<TestWebhookResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (webhookId: string): Promise<TestWebhookResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.testWebhook(webhookId);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for regenerating a webhook's signing secret.
+ */
+export function useRegenerateWebhookSecret(): UseAsyncResult<RegenerateSecretResult, string> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<RegenerateSecretResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (webhookId: string): Promise<RegenerateSecretResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.regenerateWebhookSecret(webhookId);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Pricing Hooks
+// =============================================================================
+
+/**
+ * Hook for getting public pricing plans.
+ */
+export function useGetPricing(): Omit<UseAsyncResult<PricingResult, void>, 'execute'> & { execute: () => Promise<PricingResult> } {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<PricingResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (): Promise<PricingResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getPricing();
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for getting detailed pricing plans (requires authentication).
+ */
+export function useGetPricingDetails(): Omit<UseAsyncResult<PricingDetailsResult, void>, 'execute'> & { execute: () => Promise<PricingDetailsResult> } {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<PricingDetailsResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (): Promise<PricingDetailsResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getPricingDetails();
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Usage Hooks
+// =============================================================================
+
+/**
+ * Hook for getting usage history.
+ *
+ * @example
+ * ```tsx
+ * function UsageChart() {
+ *   const { data, loading, execute } = useGetUsageHistory();
+ *
+ *   useEffect(() => {
+ *     execute(14); // last 14 days
+ *   }, []);
+ * }
+ * ```
+ */
+export function useGetUsageHistory(): UseAsyncResult<UsageHistoryResult, number | undefined> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<UsageHistoryResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (days?: number): Promise<UsageHistoryResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getUsageHistory(days);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for getting usage broken down by tool/endpoint.
+ *
+ * @example
+ * ```tsx
+ * function ToolUsage() {
+ *   const { data, loading, execute } = useGetUsageByTool();
+ *
+ *   useEffect(() => {
+ *     execute(); // today's usage
+ *   }, []);
+ * }
+ * ```
+ */
+export function useGetUsageByTool(): UseAsyncResult<UsageByToolResult, string | undefined> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<UsageByToolResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (date?: string): Promise<UsageByToolResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getUsageByTool(date);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for getting monthly usage summary with upgrade recommendations.
+ */
+export function useGetUsageMonthly(): Omit<UseAsyncResult<UsageMonthlyResult, void>, 'execute'> & { execute: () => Promise<UsageMonthlyResult> } {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<UsageMonthlyResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (): Promise<UsageMonthlyResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getUsageMonthly();
         setState({ data: result, loading: false, error: null });
         return result;
       } catch (err) {

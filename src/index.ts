@@ -77,6 +77,40 @@ export {
   type AuditLogsResult,
   type GetAuditLogsOptions,
 
+  // Media types
+  type AnalyzeVoiceInput,
+  type VoiceAnalysisResult,
+  type TranscriptionResult,
+  type TranscriptionSegment,
+  type AnalyzeImageInput,
+  type ImageAnalysisResult,
+  type VisionResult,
+
+  // Webhook types
+  type Webhook,
+  type WebhookListResult,
+  type CreateWebhookInput,
+  type CreateWebhookResult,
+  type UpdateWebhookInput,
+  type UpdateWebhookResult,
+  type DeleteWebhookResult,
+  type TestWebhookResult,
+  type RegenerateSecretResult,
+
+  // Pricing types
+  type PricingPlan,
+  type PricingResult,
+  type PricingDetailPlan,
+  type PricingDetailsResult,
+
+  // Usage types
+  type UsageSummary,
+  type UsageQuota,
+  type UsageDay,
+  type UsageHistoryResult,
+  type UsageByToolResult,
+  type UsageMonthlyResult,
+
   // Utilities
   type Usage,
 } from '@tuteliq/sdk';
@@ -100,5 +134,22 @@ export {
   useWithdrawConsent,
   useRectifyData,
   useGetAuditLogs,
+  useLogBreach,
+  useListBreaches,
+  useGetBreach,
+  useUpdateBreachStatus,
+  useAnalyzeVoice,
+  useAnalyzeImage,
+  useListWebhooks,
+  useCreateWebhook,
+  useUpdateWebhook,
+  useDeleteWebhook,
+  useTestWebhook,
+  useRegenerateWebhookSecret,
+  useGetPricing,
+  useGetPricingDetails,
+  useGetUsageHistory,
+  useGetUsageByTool,
+  useGetUsageMonthly,
 } from './hooks';
 export type { AsyncState, UseAsyncResult } from './hooks';
