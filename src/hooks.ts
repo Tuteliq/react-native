@@ -48,7 +48,6 @@ import {
   UsageHistoryResult,
   UsageByToolResult,
   UsageMonthlyResult,
-  createVoiceStream,
   VoiceStreamConfig,
   VoiceStreamHandlers,
   VoiceStreamSession,
