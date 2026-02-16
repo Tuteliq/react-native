@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   TuteliqClient,
   DetectBullyingInput,
@@ -48,6 +48,10 @@ import {
   UsageHistoryResult,
   UsageByToolResult,
   UsageMonthlyResult,
+  createVoiceStream,
+  VoiceStreamConfig,
+  VoiceStreamHandlers,
+  VoiceStreamSession,
 } from '@tuteliq/sdk';
 import { useTuteliqClient } from './context';
 
@@ -1218,4 +1222,103 @@ export function useGetUsageMonthly(): Omit<UseAsyncResult<UsageMonthlyResult, vo
   }, []);
 
   return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Voice Streaming Hook
+// =============================================================================
+
+/**
+ * Hook for real-time voice streaming analysis.
+ *
+ * @example
+ * ```tsx
+ * function VoiceMonitor() {
+ *   const { session, isConnected, start, stop, sendAudio } = useVoiceStream({
+ *     config: { intervalSeconds: 10, analysisTypes: ['bullying', 'unsafe'] },
+ *     handlers: {
+ *       onTranscription: (e) => console.log('Text:', e.text),
+ *       onAlert: (e) => console.log('Alert:', e.category),
+ *     },
+ *   });
+ *
+ *   return (
+ *     <Button title={isConnected ? 'Stop' : 'Start'} onPress={isConnected ? stop : start} />
+ *   );
+ * }
+ * ```
+ */
+export interface UseVoiceStreamOptions {
+  config?: VoiceStreamConfig;
+  handlers?: VoiceStreamHandlers;
+}
+
+export interface UseVoiceStreamResult {
+  /** The underlying voice stream session */
+  session: VoiceStreamSession | null;
+  /** Whether the stream is currently connected */
+  isConnected: boolean;
+  /** Start the voice stream connection */
+  start: () => void;
+  /** Stop the voice stream and close the connection */
+  stop: () => void;
+  /** Send raw audio data to the stream */
+  sendAudio: (data: Buffer | Uint8Array) => void;
+}
+
+export function useVoiceStream(options?: UseVoiceStreamOptions): UseVoiceStreamResult {
+  const { client } = useTuteliqClient();
+  const [isConnected, setIsConnected] = useState(false);
+  const sessionRef = useRef<VoiceStreamSession | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup on unmount
+      if (sessionRef.current?.isActive) {
+        sessionRef.current.close();
+      }
+    };
+  }, []);
+
+  const start = useCallback(() => {
+    if (sessionRef.current?.isActive) return;
+
+    const wrappedHandlers: VoiceStreamHandlers = {
+      ...options?.handlers,
+      onReady: (event) => {
+        setIsConnected(true);
+        options?.handlers?.onReady?.(event);
+      },
+      onClose: (code, reason) => {
+        setIsConnected(false);
+        sessionRef.current = null;
+        options?.handlers?.onClose?.(code, reason);
+      },
+    };
+
+    sessionRef.current = (client as any).voiceStream(options?.config, wrappedHandlers);
+  }, [client, options?.config, options?.handlers]);
+
+  const stop = useCallback(() => {
+    if (sessionRef.current) {
+      sessionRef.current.close();
+      sessionRef.current = null;
+      setIsConnected(false);
+    }
+  }, []);
+
+  const sendAudio = useCallback((data: Buffer | Uint8Array) => {
+    if (!sessionRef.current?.isActive) {
+      throw new Error('Voice stream is not connected');
+    }
+    sessionRef.current.sendAudio(data);
+  }, []);
+
+  return {
+    session: sessionRef.current,
+    isConnected,
+    start,
+    stop,
+    sendAudio,
+  };
 }

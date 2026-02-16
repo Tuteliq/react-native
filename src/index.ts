@@ -111,6 +111,17 @@ export {
   type UsageByToolResult,
   type UsageMonthlyResult,
 
+  // Voice streaming types
+  type VoiceStreamConfig,
+  type VoiceStreamHandlers,
+  type VoiceStreamSession,
+  type VoiceReadyEvent,
+  type VoiceTranscriptionEvent,
+  type VoiceAlertEvent,
+  type VoiceSessionSummaryEvent,
+  type VoiceConfigUpdatedEvent,
+  type VoiceErrorEvent,
+
   // Utilities
   type Usage,
 } from '@tuteliq/sdk';
@@ -151,5 +162,6 @@ export {
   useGetUsageHistory,
   useGetUsageByTool,
   useGetUsageMonthly,
+  useVoiceStream,
 } from './hooks';
-export type { AsyncState, UseAsyncResult } from './hooks';
+export type { AsyncState, UseAsyncResult, UseVoiceStreamOptions, UseVoiceStreamResult } from './hooks';

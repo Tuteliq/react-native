@@ -223,6 +223,33 @@ const report = await execute({
 console.log('Summary:', report.summary);
 ```
 
+### Voice Streaming
+
+Real-time voice analysis with the `useVoiceStream` hook:
+
+```tsx
+import { useVoiceStream } from '@tuteliq/react-native';
+
+function VoiceMonitor() {
+  const { isConnected, start, stop, sendAudio } = useVoiceStream({
+    config: { intervalSeconds: 10, analysisTypes: ['bullying', 'unsafe'] },
+    handlers: {
+      onReady: (e) => console.log('Session ready:', e.session_id),
+      onTranscription: (e) => console.log('Text:', e.text),
+      onAlert: (e) => console.log('Alert:', e.category, e.severity),
+      onSessionSummary: (e) => console.log('Summary:', e.overall_risk),
+    },
+  });
+
+  return (
+    <Button
+      title={isConnected ? 'Stop Monitoring' : 'Start Monitoring'}
+      onPress={isConnected ? stop : start}
+    />
+  );
+}
+```
+
 ### Direct Client Access
 
 For advanced use cases, access the client directly:
