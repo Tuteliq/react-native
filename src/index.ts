@@ -122,6 +122,28 @@ export {
   type VoiceConfigUpdatedEvent,
   type VoiceErrorEvent,
 
+  // Detection types
+  type DetectionInput,
+  type DetectionCategory,
+  type DetectionEvidence,
+  type AgeCalibration,
+  type DetectionResult,
+  type AnalyseMultiInput,
+  type AnalyseMultiSummary,
+  type AnalyseMultiResult,
+
+  // Video types
+  type VideoSafetyFinding,
+  type AnalyzeVideoInput,
+  type VideoAnalysisResult,
+
+  // New enums
+  Detection,
+  Language,
+  LanguageStatus,
+  Tier,
+  SUPPORTED_LANGUAGES,
+
   // Utilities
   type Usage,
 } from '@tuteliq/sdk';
@@ -162,6 +184,16 @@ export {
   useGetUsageHistory,
   useGetUsageByTool,
   useGetUsageMonthly,
+  useDetectSocialEngineering,
+  useDetectAppFraud,
+  useDetectRomanceScam,
+  useDetectMuleRecruitment,
+  useDetectGamblingHarm,
+  useDetectCoerciveControl,
+  useDetectVulnerabilityExploitation,
+  useDetectRadicalisation,
+  useAnalyseMulti,
+  useAnalyzeVideo,
   useVoiceStream,
 } from './hooks';
 export type { AsyncState, UseAsyncResult, UseVoiceStreamOptions, UseVoiceStreamResult } from './hooks';

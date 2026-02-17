@@ -51,6 +51,12 @@ import {
   VoiceStreamConfig,
   VoiceStreamHandlers,
   VoiceStreamSession,
+  DetectionInput,
+  DetectionResult,
+  AnalyseMultiInput,
+  AnalyseMultiResult,
+  AnalyzeVideoInput,
+  VideoAnalysisResult,
 } from '@tuteliq/sdk';
 import { useTuteliqClient } from './context';
 
@@ -1205,6 +1211,389 @@ export function useGetUsageMonthly(): Omit<UseAsyncResult<UsageMonthlyResult, vo
       setState({ data: null, loading: true, error: null });
       try {
         const result = await client.getUsageMonthly();
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Fraud Detection Hooks
+// =============================================================================
+
+/**
+ * Hook for social engineering detection.
+ */
+export function useDetectSocialEngineering(): UseAsyncResult<DetectionResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DetectionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DetectionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectSocialEngineering(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for app fraud detection.
+ */
+export function useDetectAppFraud(): UseAsyncResult<DetectionResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DetectionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DetectionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectAppFraud(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for romance scam detection.
+ */
+export function useDetectRomanceScam(): UseAsyncResult<DetectionResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DetectionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DetectionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectRomanceScam(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for mule recruitment detection.
+ */
+export function useDetectMuleRecruitment(): UseAsyncResult<DetectionResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DetectionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DetectionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectMuleRecruitment(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Safety Extended Hooks
+// =============================================================================
+
+/**
+ * Hook for gambling harm detection.
+ */
+export function useDetectGamblingHarm(): UseAsyncResult<DetectionResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DetectionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DetectionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectGamblingHarm(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for coercive control detection.
+ */
+export function useDetectCoerciveControl(): UseAsyncResult<DetectionResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DetectionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DetectionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectCoerciveControl(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for vulnerability exploitation detection.
+ */
+export function useDetectVulnerabilityExploitation(): UseAsyncResult<DetectionResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DetectionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DetectionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectVulnerabilityExploitation(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for radicalisation detection.
+ */
+export function useDetectRadicalisation(): UseAsyncResult<DetectionResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DetectionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DetectionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectRadicalisation(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Multi-Endpoint Analysis Hook
+// =============================================================================
+
+/**
+ * Hook for multi-endpoint analysis.
+ *
+ * @example
+ * ```tsx
+ * function MultiCheck() {
+ *   const { data, loading, error, execute } = useAnalyseMulti();
+ *
+ *   const handleCheck = async () => {
+ *     const result = await execute({
+ *       content: 'Message to check',
+ *       endpoints: ['bullying', 'grooming', 'unsafe'],
+ *     });
+ *     console.log('Summary:', result.summary);
+ *   };
+ * }
+ * ```
+ */
+export function useAnalyseMulti(): UseAsyncResult<AnalyseMultiResult, AnalyseMultiInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<AnalyseMultiResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: AnalyseMultiInput): Promise<AnalyseMultiResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.analyseMulti(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Video Analysis Hook
+// =============================================================================
+
+/**
+ * Hook for video analysis.
+ *
+ * @example
+ * ```tsx
+ * function VideoChecker() {
+ *   const { data, loading, error, execute } = useAnalyzeVideo();
+ *
+ *   const handleAnalyze = async (url: string) => {
+ *     const result = await execute({ url });
+ *     console.log('Findings:', result.findings);
+ *   };
+ * }
+ * ```
+ */
+export function useAnalyzeVideo(): UseAsyncResult<VideoAnalysisResult, AnalyzeVideoInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<VideoAnalysisResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: AnalyzeVideoInput): Promise<VideoAnalysisResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.analyzeVideo(input);
         setState({ data: result, loading: false, error: null });
         return result;
       } catch (err) {
