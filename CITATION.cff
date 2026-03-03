@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: Tuteliq React Native SDK
+message: "If you use this software, please cite it using this metadata."
+type: software
+authors:
+  - name: Tuteliq
+    website: https://tuteliq.ai
+repository-code: https://github.com/Tuteliq/react-native
+url: https://tuteliq.ai
+abstract: >-
+  Official React Native SDK for Tuteliq — AI-powered child safety API with hooks for mobile apps
+keywords:
+  - child safety
+  - React Native
+  - mobile
+  - content moderation
+  - KOSA
+  - SDK
+  - iOS
+  - Android
+  - hooks
+  - online safety
+license: MIT
