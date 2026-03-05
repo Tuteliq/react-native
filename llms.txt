@@ -21,6 +21,8 @@ const result = await tuteliq.detectUnsafe({ text: 'content to check', ageGroup: 
 - 16+ detection categories (KOSA compliant)
 - Age group calibration
 - TypeScript support
+- Age Verification (Beta) — POST /v1/verification/age — Pro tier+, 5 credits
+- Identity Verification (Beta) — POST /v1/verification/identity — Business tier+, 10 credits
 
 ## Links
 - Website: https://tuteliq.ai
