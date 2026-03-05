@@ -224,6 +224,57 @@ const report = await execute({
 console.log('Summary:', report.summary);
 ```
 
+#### useVerifyAge (Beta)
+
+Age verification using document scanning, biometric analysis, or both. Requires Pro tier ($99/mo) or higher. Costs 5 credits per request.
+
+```tsx
+import { useVerifyAge } from '@tuteliq/react-native';
+
+function AgeGate() {
+  const { verify, result, loading } = useVerifyAge();
+
+  const handleVerify = async () => {
+    const res = await verify({
+      document: { uri: documentUri, type: 'image/jpeg' },
+      selfie: { uri: selfieUri, type: 'image/jpeg' },
+      method: 'combined', // 'document' | 'biometric' | 'combined'
+    });
+
+    console.log(res.verified);       // true
+    console.log(res.estimated_age);  // 15
+    console.log(res.age_range);      // "13-15"
+    console.log(res.is_minor);       // true
+    console.log(res.confidence);     // 0.97
+  };
+}
+```
+
+#### useVerifyIdentity (Beta)
+
+Identity verification with document authentication and liveness detection. Requires Business tier ($349/mo) or higher. Costs 10 credits per request.
+
+```tsx
+import { useVerifyIdentity } from '@tuteliq/react-native';
+
+function IdentityCheck() {
+  const { verify, result, loading } = useVerifyIdentity();
+
+  const handleVerify = async () => {
+    const res = await verify({
+      document: { uri: documentUri, type: 'image/jpeg' },
+      selfie: { uri: selfieUri, type: 'image/jpeg' },
+    });
+
+    console.log(res.verified);               // true
+    console.log(res.match_score);            // 0.98
+    console.log(res.liveness_passed);        // true
+    console.log(res.document_authenticated); // true
+    console.log(res.is_minor);              // false
+  };
+}
+```
+
 ### Voice Streaming
 
 Real-time voice analysis with the `useVoiceStream` hook:
