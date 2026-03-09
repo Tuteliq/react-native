@@ -149,6 +149,11 @@ const result = await execute({
   ],
   childAge: 12,
 });
+
+// Per-message breakdown (optional, returned on conversation-aware endpoints)
+result.message_analysis?.forEach(m => {
+  console.log(`Message ${m.message_index}: risk=${m.risk_score}, flags=${m.flags}, summary=${m.summary}`);
+});
 ```
 
 #### useDetectUnsafe
