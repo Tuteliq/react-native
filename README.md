@@ -302,6 +302,31 @@ function VoiceMonitor() {
 }
 ```
 
+#### useAnalyzeDocument
+
+Analyze PDF documents for safety concerns with per-page multi-endpoint detection:
+
+```tsx
+import { useAnalyzeDocument } from '@tuteliq/react-native';
+import { readFile } from 'react-native-fs';
+
+function DocumentChecker() {
+  const { data, loading, error, execute } = useAnalyzeDocument();
+
+  const handleCheck = async (filePath: string) => {
+    const buffer = await readFile(filePath, 'base64');
+    const result = await execute({
+      file: Buffer.from(buffer, 'base64'),
+      filename: 'report.pdf',
+      endpoints: ['unsafe', 'coercive-control', 'radicalisation'],
+      ageGroup: '13-15',
+    });
+    console.log('Risk:', result.overall_risk_score);
+    console.log('Flagged pages:', result.flagged_pages.length);
+  };
+}
+```
+
 ### Direct Client Access
 
 For advanced use cases, access the client directly:

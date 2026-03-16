@@ -1,6 +1,6 @@
 {
   "name": "@tuteliq/react-native",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Official React Native SDK for Tuteliq - AI-powered child safety API",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -48,7 +48,7 @@
     "url": "https://github.com/Tuteliq/react-native/issues"
   },
   "dependencies": {
-    "@tuteliq/sdk": "^2.1.0"
+    "@tuteliq/sdk": "^2.6.0"
   },
   "peerDependencies": {
     "react": ">=17.0.0",

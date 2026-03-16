@@ -137,6 +137,15 @@ export {
   type AnalyzeVideoInput,
   type VideoAnalysisResult,
 
+  // Document types
+  type DocumentEndpointName,
+  type AnalyzeDocumentInput,
+  type DocumentAnalysisResult,
+  type DocumentExtractionSummary,
+  type DocumentPageResult,
+  type DocumentPageEndpointResult,
+  type DocumentFlaggedPage,
+
   // New enums
   Detection,
   Language,
@@ -194,6 +203,7 @@ export {
   useDetectRadicalisation,
   useAnalyseMulti,
   useAnalyzeVideo,
+  useAnalyzeDocument,
   useVoiceStream,
 } from './hooks';
 export type { AsyncState, UseAsyncResult, UseVoiceStreamOptions, UseVoiceStreamResult } from './hooks';

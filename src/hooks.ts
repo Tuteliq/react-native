@@ -57,6 +57,8 @@ import {
   AnalyseMultiResult,
   AnalyzeVideoInput,
   VideoAnalysisResult,
+  AnalyzeDocumentInput,
+  DocumentAnalysisResult,
 } from '@tuteliq/sdk';
 import { useTuteliqClient } from './context';
 
@@ -1594,6 +1596,56 @@ export function useAnalyzeVideo(): UseAsyncResult<VideoAnalysisResult, AnalyzeVi
       setState({ data: null, loading: true, error: null });
       try {
         const result = await client.analyzeVideo(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Document Analysis Hook
+// =============================================================================
+
+/**
+ * Hook for document analysis.
+ *
+ * @example
+ * ```tsx
+ * function DocumentChecker() {
+ *   const { data, loading, error, execute } = useAnalyzeDocument();
+ *
+ *   const handleAnalyze = async (file: Buffer) => {
+ *     const result = await execute({ file, filename: 'report.pdf', endpoints: ['unsafe'] });
+ *     console.log('Risk:', result.overall_risk_score);
+ *   };
+ * }
+ * ```
+ */
+export function useAnalyzeDocument(): UseAsyncResult<DocumentAnalysisResult, AnalyzeDocumentInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DocumentAnalysisResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: AnalyzeDocumentInput): Promise<DocumentAnalysisResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.analyzeDocument(input);
         setState({ data: result, loading: false, error: null });
         return result;
       } catch (err) {
