@@ -45,7 +45,7 @@ export function TuteliqProvider({
   apiKey,
   options,
   children,
-}: TuteliqProviderProps): JSX.Element {
+}: TuteliqProviderProps): React.JSX.Element {
   const clientRef = useRef<TuteliqClient | null>(null);
 
   // Create client only once
