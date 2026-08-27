@@ -133,16 +133,12 @@ export {
   type AnalyseMultiResult,
 
   // Video types
-  type VideoSafetyFinding,
   type AnalyzeVideoInput,
   type VideoAnalysisResult,
+  type VideoFlaggedTimestamp,
 
   // New enums
-  Detection,
-  Language,
-  LanguageStatus,
   Tier,
-  SUPPORTED_LANGUAGES,
 
   // Utilities
   type Usage,

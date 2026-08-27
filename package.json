@@ -48,7 +48,7 @@
     "url": "https://github.com/Tuteliq/react-native/issues"
   },
   "dependencies": {
-    "@tuteliq/sdk": "^2.1.0"
+    "@tuteliq/sdk": "^2.31.0"
   },
   "peerDependencies": {
     "react": ">=17.0.0",
