@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import {
-  TuteliqClient,
   DetectBullyingInput,
   BullyingResult,
   DetectGroomingInput,
@@ -1684,7 +1683,7 @@ export function useVoiceStream(options?: UseVoiceStreamOptions): UseVoiceStreamR
       },
     };
 
-    sessionRef.current = (client as any).voiceStream(options?.config, wrappedHandlers);
+    sessionRef.current = client.voiceStream(options?.config, wrappedHandlers);
   }, [client, options?.config, options?.handlers]);
 
   const stop = useCallback(() => {
