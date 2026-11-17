@@ -56,8 +56,49 @@ import {
   AnalyseMultiResult,
   AnalyzeVideoInput,
   VideoAnalysisResult,
+  CreateVerificationSessionInput,
+  VerificationSession,
+  VerificationSessionResult,
+  VerifyImageMatchInput,
+  VerifyImageMatchResult,
+  ListIncidentsInput,
+  ListIncidentsResult,
+  IncidentDetail,
+  IncidentsOverviewInput,
+  IncidentsOverview,
+  IncidentTrendsInput,
+  IncidentTrends,
+  ReviewIncidentInput,
+  ReviewIncidentResult,
+  BatchReviewIncidentsInput,
+  BatchReviewIncidentsResult,
+  AnalyzeDocumentInput,
+  DocumentAnalysisResult,
+  DetectSyntheticTextInput,
+  SyntheticTextResult,
+  DetectSyntheticImageInput,
+  SyntheticImageResult,
+  DetectSyntheticAudioInput,
+  SyntheticAudioResult,
+  DetectSyntheticVideoInput,
+  SyntheticVideoResult,
+  DistressSignalsResult,
+  TFGBVResult,
+  UsageSummary,
+  UsageQuota,
+  TuteliqClient,
 } from '@tuteliq/sdk';
 import { useTuteliqClient } from './context';
+
+/**
+ * Input for {@link useBatch}: the items to analyze in one request.
+ */
+export type BatchAnalyzeInput = Parameters<TuteliqClient['batch']>[0];
+
+/**
+ * Result of {@link useBatch}: one result per item plus a summary.
+ */
+export type BatchAnalyzeResult = Awaited<ReturnType<TuteliqClient['batch']>>;
 
 /**
  * State for async operations.
@@ -351,7 +392,7 @@ export function useGenerateReport(): UseAsyncResult<ReportResult, GenerateReport
 }
 
 /**
- * Hook for account data deletion (GDPR Article 17 — Right to Erasure).
+ * Hook for account data deletion (GDPR Article 17, Right to Erasure).
  */
 export function useDeleteAccountData(): Omit<UseAsyncResult<AccountDeletionResult, void>, 'execute'> & { execute: () => Promise<AccountDeletionResult> } {
   const { client } = useTuteliqClient();
@@ -385,7 +426,7 @@ export function useDeleteAccountData(): Omit<UseAsyncResult<AccountDeletionResul
 }
 
 /**
- * Hook for account data export (GDPR Article 20 — Right to Data Portability).
+ * Hook for account data export (GDPR Article 20, Right to Data Portability).
  */
 export function useExportAccountData(): Omit<UseAsyncResult<AccountExportResult, void>, 'execute'> & { execute: () => Promise<AccountExportResult> } {
   const { client } = useTuteliqClient();
@@ -1593,6 +1634,726 @@ export function useAnalyzeVideo(): UseAsyncResult<VideoAnalysisResult, AnalyzeVi
       setState({ data: null, loading: true, error: null });
       try {
         const result = await client.analyzeVideo(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Verification Session Hooks
+// =============================================================================
+
+/**
+ * Hook for creating an age or identity verification session.
+ *
+ * @example
+ * ```tsx
+ * function VerifyAge() {
+ *   const { execute, loading } = useCreateVerificationSession();
+ *
+ *   const handleStart = async () => {
+ *     const session = await execute({ mode: VerificationMode.AGE });
+ *     await Linking.openURL(session.url);
+ *   };
+ * }
+ * ```
+ */
+export function useCreateVerificationSession(): UseAsyncResult<VerificationSession, CreateVerificationSessionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<VerificationSession>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: CreateVerificationSessionInput): Promise<VerificationSession> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.createVerificationSession(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for reading the status and outcome of a verification session.
+ */
+export function useGetVerificationSession(): UseAsyncResult<VerificationSessionResult, string> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<VerificationSessionResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (sessionId: string): Promise<VerificationSessionResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getVerificationSession(sessionId);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for cancelling a verification session.
+ */
+export function useCancelVerificationSession(): UseAsyncResult<void, string> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<void>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (sessionId: string): Promise<void> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.cancelVerificationSession(sessionId);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for comparing a face image against a reference image.
+ */
+export function useVerifyImageMatch(): UseAsyncResult<VerifyImageMatchResult, VerifyImageMatchInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<VerifyImageMatchResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: VerifyImageMatchInput): Promise<VerifyImageMatchResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.verifyImageMatch(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Incident Hooks
+// =============================================================================
+
+/**
+ * Hook for listing incidents, newest first, with optional filters.
+ */
+export function useListIncidents(): UseAsyncResult<ListIncidentsResult, ListIncidentsInput | undefined> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<ListIncidentsResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input?: ListIncidentsInput): Promise<ListIncidentsResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.listIncidents(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for getting a single incident.
+ */
+export function useGetIncident(): UseAsyncResult<IncidentDetail, string> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<IncidentDetail>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (incidentId: string): Promise<IncidentDetail> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getIncident(incidentId);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for getting incident counts over a date range.
+ */
+export function useGetIncidentsOverview(): UseAsyncResult<IncidentsOverview, IncidentsOverviewInput | undefined> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<IncidentsOverview>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input?: IncidentsOverviewInput): Promise<IncidentsOverview> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getIncidentsOverview(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for getting incident counts bucketed over time.
+ */
+export function useGetIncidentTrends(): UseAsyncResult<IncidentTrends, IncidentTrendsInput | undefined> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<IncidentTrends>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input?: IncidentTrendsInput): Promise<IncidentTrends> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getIncidentTrends(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for submitting a moderator review of an incident.
+ */
+export function useReviewIncident(): UseAsyncResult<ReviewIncidentResult, { incidentId: string; input: ReviewIncidentInput }> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<ReviewIncidentResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (params: { incidentId: string; input: ReviewIncidentInput }): Promise<ReviewIncidentResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.reviewIncident(params.incidentId, params.input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for applying one moderator review to several incidents.
+ */
+export function useBatchReviewIncidents(): UseAsyncResult<BatchReviewIncidentsResult, BatchReviewIncidentsInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<BatchReviewIncidentsResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: BatchReviewIncidentsInput): Promise<BatchReviewIncidentsResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.batchReviewIncidents(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Document Analysis Hook
+// =============================================================================
+
+/**
+ * Hook for analyzing a document (PDF) page by page.
+ */
+export function useAnalyzeDocument(): UseAsyncResult<DocumentAnalysisResult, AnalyzeDocumentInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DocumentAnalysisResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: AnalyzeDocumentInput): Promise<DocumentAnalysisResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.analyzeDocument(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Synthetic Content Hooks
+// =============================================================================
+
+/**
+ * Hook for detecting AI-generated text.
+ */
+export function useDetectSyntheticText(): UseAsyncResult<SyntheticTextResult, DetectSyntheticTextInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<SyntheticTextResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectSyntheticTextInput): Promise<SyntheticTextResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectSyntheticText(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for detecting AI-generated or manipulated images.
+ */
+export function useDetectSyntheticImage(): UseAsyncResult<SyntheticImageResult, DetectSyntheticImageInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<SyntheticImageResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectSyntheticImageInput): Promise<SyntheticImageResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectSyntheticImage(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for detecting AI-generated or cloned audio.
+ */
+export function useDetectSyntheticAudio(): UseAsyncResult<SyntheticAudioResult, DetectSyntheticAudioInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<SyntheticAudioResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectSyntheticAudioInput): Promise<SyntheticAudioResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectSyntheticAudio(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for detecting AI-generated or manipulated video.
+ */
+export function useDetectSyntheticVideo(): UseAsyncResult<SyntheticVideoResult, DetectSyntheticVideoInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<SyntheticVideoResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectSyntheticVideoInput): Promise<SyntheticVideoResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectSyntheticVideo(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Safety Detection Hooks
+// =============================================================================
+
+/**
+ * Hook for distress signal detection.
+ */
+export function useDetectDistressSignals(): UseAsyncResult<DistressSignalsResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<DistressSignalsResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<DistressSignalsResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectDistressSignals(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for technology-facilitated gender-based violence detection.
+ */
+export function useDetectTFGBV(): UseAsyncResult<TFGBVResult, DetectionInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<TFGBVResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: DetectionInput): Promise<TFGBVResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.detectTFGBV(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Batch Analysis Hook
+// =============================================================================
+
+/**
+ * Hook for analyzing up to 50 items in one request.
+ */
+export function useBatch(): UseAsyncResult<BatchAnalyzeResult, BatchAnalyzeInput> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<BatchAnalyzeResult>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (input: BatchAnalyzeInput): Promise<BatchAnalyzeResult> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.batch(input);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+// =============================================================================
+// Usage Summary and Quota Hooks
+// =============================================================================
+
+/**
+ * Hook for getting the usage summary for a day (defaults to today).
+ */
+export function useGetUsageSummary(): UseAsyncResult<UsageSummary, string | undefined> {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<UsageSummary>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (date?: string): Promise<UsageSummary> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getUsageSummary(date);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setState({ data: null, loading: false, error });
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, execute, reset };
+}
+
+/**
+ * Hook for getting the current rate limit quota.
+ */
+export function useGetQuota(): Omit<UseAsyncResult<UsageQuota, void>, 'execute'> & { execute: () => Promise<UsageQuota> } {
+  const { client } = useTuteliqClient();
+  const [state, setState] = useState<AsyncState<UsageQuota>>({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const execute = useCallback(
+    async (): Promise<UsageQuota> => {
+      setState({ data: null, loading: true, error: null });
+      try {
+        const result = await client.getQuota();
         setState({ data: result, loading: false, error: null });
         return result;
       } catch (err) {
