@@ -8,7 +8,7 @@ authors:
 repository-code: https://github.com/Tuteliq/react-native
 url: https://tuteliq.ai
 abstract: >-
-  Official React Native SDK for Tuteliq — AI-powered child safety API with hooks for mobile apps
+  Official React Native SDK for Tuteliq, the AI-powered child safety API with hooks for mobile apps
 keywords:
   - child safety
   - React Native
