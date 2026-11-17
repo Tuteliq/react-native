@@ -4,145 +4,9 @@
  * @packageDocumentation
  */
 
-// Re-export everything from the core SDK
-export {
-  // Client
-  TuteliqClient,
-  type TuteliqOptions,
-
-  // Input types
-  type DetectBullyingInput,
-  type DetectGroomingInput,
-  type DetectUnsafeInput,
-  type AnalyzeInput,
-  type AnalyzeEmotionsInput,
-  type GetActionPlanInput,
-  type GenerateReportInput,
-
-  // Result types
-  type BullyingResult,
-  type GroomingResult,
-  type UnsafeResult,
-  type AnalyzeResult,
-  type EmotionsResult,
-  type ActionPlanResult,
-  type ReportResult,
-
-  // Message types
-  type GroomingMessage,
-  type EmotionMessage,
-  type ReportMessage,
-
-  // Context type
-  type ContextInput,
-
-  // Enums
-  Severity,
-  GroomingRisk,
-  RiskLevel,
-  EmotionTrend,
-
-  // Audience type
-  type Audience,
-
-  // Errors
-  TuteliqError,
-  AuthenticationError,
-  RateLimitError,
-  ValidationError,
-  NotFoundError,
-  ServerError,
-  TimeoutError,
-  NetworkError,
-
-  // Account types (GDPR)
-  type AccountDeletionResult,
-  type AccountExportResult,
-
-  // Consent types (GDPR)
-  type ConsentType,
-  type ConsentStatus,
-  type RecordConsentInput,
-  type ConsentRecord,
-  type ConsentStatusResult,
-  type ConsentActionResult,
-
-  // Rectification types (GDPR)
-  type RectifyDataInput,
-  type RectifyDataResult,
-
-  // Audit log types (GDPR)
-  type AuditAction,
-  type AuditLogEntry,
-  type AuditLogsResult,
-  type GetAuditLogsOptions,
-
-  // Media types
-  type AnalyzeVoiceInput,
-  type VoiceAnalysisResult,
-  type TranscriptionResult,
-  type TranscriptionSegment,
-  type AnalyzeImageInput,
-  type ImageAnalysisResult,
-  type VisionResult,
-
-  // Webhook types
-  type Webhook,
-  type WebhookListResult,
-  type CreateWebhookInput,
-  type CreateWebhookResult,
-  type UpdateWebhookInput,
-  type UpdateWebhookResult,
-  type DeleteWebhookResult,
-  type TestWebhookResult,
-  type RegenerateSecretResult,
-
-  // Pricing types
-  type PricingPlan,
-  type PricingResult,
-  type PricingDetailPlan,
-  type PricingDetailsResult,
-
-  // Usage types
-  type UsageSummary,
-  type UsageQuota,
-  type UsageDay,
-  type UsageHistoryResult,
-  type UsageByToolResult,
-  type UsageMonthlyResult,
-
-  // Voice streaming types
-  type VoiceStreamConfig,
-  type VoiceStreamHandlers,
-  type VoiceStreamSession,
-  type VoiceReadyEvent,
-  type VoiceTranscriptionEvent,
-  type VoiceAlertEvent,
-  type VoiceSessionSummaryEvent,
-  type VoiceConfigUpdatedEvent,
-  type VoiceErrorEvent,
-
-  // Detection types
-  type DetectionInput,
-  type DetectionCategory,
-  type DetectionEvidence,
-  type AgeCalibration,
-  type DetectionResult,
-  type AnalyseMultiInput,
-  type AnalyseMultiSummary,
-  type AnalyseMultiResult,
-
-  // Video types
-  type AnalyzeVideoInput,
-  type VideoAnalysisResult,
-  type VideoFlaggedTimestamp,
-
-  // New enums
-  Tier,
-
-  // Utilities
-  type Usage,
-} from '@tuteliq/sdk';
+// Re-export everything from the core SDK: the client, enums, errors, helpers
+// and every public type, so this package always matches the SDK it wraps.
+export * from '@tuteliq/sdk';
 
 // React Native specific exports
 export { TuteliqProvider, useTuteliqClient } from './context';
@@ -190,6 +54,33 @@ export {
   useDetectRadicalisation,
   useAnalyseMulti,
   useAnalyzeVideo,
+  useCreateVerificationSession,
+  useGetVerificationSession,
+  useCancelVerificationSession,
+  useVerifyImageMatch,
+  useListIncidents,
+  useGetIncident,
+  useGetIncidentsOverview,
+  useGetIncidentTrends,
+  useReviewIncident,
+  useBatchReviewIncidents,
+  useAnalyzeDocument,
+  useDetectSyntheticText,
+  useDetectSyntheticImage,
+  useDetectSyntheticAudio,
+  useDetectSyntheticVideo,
+  useDetectDistressSignals,
+  useDetectTFGBV,
+  useBatch,
+  useGetUsageSummary,
+  useGetQuota,
   useVoiceStream,
 } from './hooks';
-export type { AsyncState, UseAsyncResult, UseVoiceStreamOptions, UseVoiceStreamResult } from './hooks';
+export type {
+  AsyncState,
+  UseAsyncResult,
+  UseVoiceStreamOptions,
+  UseVoiceStreamResult,
+  BatchAnalyzeInput,
+  BatchAnalyzeResult,
+} from './hooks';

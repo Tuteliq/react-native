@@ -37,45 +37,50 @@ yarn add @tuteliq/react-native
 - React Native 0.70+
 - React 17+
 
+This package wraps the [Tuteliq Node SDK](https://github.com/Tuteliq/node) (`@tuteliq/sdk`) in a provider and React hooks. Everything the Node SDK exports (the client, enums, errors, helpers and types) is re-exported from `@tuteliq/react-native`, so you never need to import `@tuteliq/sdk` directly.
+
 ---
 
 ## Quick Start
 
-### Setup Provider
+### Set up the provider
 
 Wrap your app with `TuteliqProvider`:
 
 ```tsx
+import React from 'react';
 import { TuteliqProvider } from '@tuteliq/react-native';
+import { ChatInput } from './ChatInput';
 
 export default function App() {
   return (
     <TuteliqProvider apiKey="your-api-key">
-      <YourApp />
+      <ChatInput />
     </TuteliqProvider>
   );
 }
 ```
 
-### Use Hooks
+### Use a hook
 
 ```tsx
-import { useAnalyze, RiskLevel } from '@tuteliq/react-native';
-import { Alert } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Button, TextInput, View } from 'react-native';
+import { useAnalyze, isActionable } from '@tuteliq/react-native';
 
-function ChatInput() {
+export function ChatInput() {
   const { execute, loading } = useAnalyze();
   const [message, setMessage] = useState('');
 
   const handleSend = async () => {
-    const result = await execute({ text: message });
+    const result = await execute({ content: message });
 
-    if (result.riskLevel !== RiskLevel.Safe) {
+    if (isActionable(result.recommended_action)) {
       Alert.alert('Warning', result.summary);
       return;
     }
 
-    // Send message...
+    // Send the message...
   };
 
   return (
@@ -87,6 +92,8 @@ function ChatInput() {
 }
 ```
 
+`recommended_action` (`none`, `monitor`, `flag_for_review`, `block` or `immediate_intervention`) is the field to branch on. `isActionable()` is true from `flag_for_review` upwards.
+
 ---
 
 ## API Reference
@@ -94,66 +101,100 @@ function ChatInput() {
 ### Provider
 
 ```tsx
+import React from 'react';
 import { TuteliqProvider } from '@tuteliq/react-native';
 
-<TuteliqProvider
-  apiKey="your-api-key"
-  config={{
-    timeout: 30000,      // Request timeout in ms
-    maxRetries: 3,       // Retry attempts
-    retryDelay: 1000,    // Initial retry delay in ms
-  }}
->
-  {children}
-</TuteliqProvider>
+export function Root({ children }: { children: React.ReactNode }) {
+  return (
+    <TuteliqProvider
+      apiKey="your-api-key"
+      options={{
+        timeout: 30000, // Request timeout in ms
+        retries: 3, // Retry attempts for failed requests
+        retryDelay: 1000, // Initial retry delay in ms
+      }}
+    >
+      {children}
+    </TuteliqProvider>
+  );
+}
 ```
+
+The client is created once, when the provider first renders.
 
 ### Hooks
 
-All hooks return:
-- `data` - The result (null until executed)
-- `loading` - Loading state
-- `error` - Error if any
-- `execute(input)` - Function to execute the operation
-- `reset()` - Reset state
+Every request hook returns:
+
+- `data`: the result (`null` until executed)
+- `loading`: whether a request is in flight
+- `error`: the last error, if any
+- `execute(input)`: runs the request and resolves with the result (it also rethrows errors)
+- `reset()`: clears `data` and `error`
+
+| Area | Hooks |
+|------|-------|
+| Safety | `useDetectBullying`, `useDetectGrooming`, `useDetectUnsafe`, `useAnalyze`, `useAnalyzeEmotions`, `useDetectDistressSignals`, `useDetectTFGBV` |
+| Fraud and harm | `useDetectSocialEngineering`, `useDetectAppFraud`, `useDetectRomanceScam`, `useDetectMuleRecruitment`, `useDetectGamblingHarm`, `useDetectCoerciveControl`, `useDetectVulnerabilityExploitation`, `useDetectRadicalisation` |
+| Multi and batch | `useAnalyseMulti`, `useBatch` |
+| Media | `useAnalyzeImage`, `useAnalyzeVoice`, `useAnalyzeVideo`, `useAnalyzeDocument`, `useVoiceStream` |
+| Synthetic content | `useDetectSyntheticText`, `useDetectSyntheticImage`, `useDetectSyntheticAudio`, `useDetectSyntheticVideo` |
+| Guidance and reports | `useGetActionPlan`, `useGenerateReport` |
+| Verification | `useCreateVerificationSession`, `useGetVerificationSession`, `useCancelVerificationSession`, `useVerifyImageMatch` |
+| Incidents | `useListIncidents`, `useGetIncident`, `useGetIncidentsOverview`, `useGetIncidentTrends`, `useReviewIncident`, `useBatchReviewIncidents` |
+| Webhooks | `useListWebhooks`, `useCreateWebhook`, `useUpdateWebhook`, `useDeleteWebhook`, `useTestWebhook`, `useRegenerateWebhookSecret` |
+| Usage and pricing | `useGetUsageSummary`, `useGetQuota`, `useGetUsageHistory`, `useGetUsageByTool`, `useGetUsageMonthly`, `useGetPricing`, `useGetPricingDetails` |
+| Privacy (GDPR) | `useDeleteAccountData`, `useExportAccountData`, `useRecordConsent`, `useGetConsentStatus`, `useWithdrawConsent`, `useRectifyData`, `useGetAuditLogs`, `useLogBreach`, `useListBreaches`, `useGetBreach`, `useUpdateBreachStatus` |
+
+Client methods without a hook (policy rules, detection settings, threat intelligence and others) are available through [`useTuteliqClient`](#direct-client-access).
 
 #### useDetectBullying
 
 ```tsx
 import { useDetectBullying } from '@tuteliq/react-native';
 
-function MyComponent() {
-  const { data, loading, error, execute } = useDetectBullying();
+export function useBullyingCheck() {
+  const { execute } = useDetectBullying();
 
-  const check = async () => {
-    const result = await execute({ text: 'Message to check' });
-    if (result.isBullying) {
+  return async (content: string) => {
+    const result = await execute({ content });
+    if (result.is_bullying) {
       console.log('Severity:', result.severity);
-      console.log('Types:', result.bullyingType);
+      console.log('Types:', result.bullying_type);
     }
+    return result;
   };
 }
 ```
 
 #### useDetectGrooming
 
+Roles are plain strings: `'adult'`, `'child'` or `'unknown'`.
+
 ```tsx
-import { useDetectGrooming, MessageRole } from '@tuteliq/react-native';
+import { useDetectGrooming } from '@tuteliq/react-native';
 
-const { execute } = useDetectGrooming();
+export function useGroomingCheck() {
+  const { execute } = useDetectGrooming();
 
-const result = await execute({
-  messages: [
-    { role: MessageRole.Adult, content: 'This is our secret' },
-    { role: MessageRole.Child, content: 'Ok I wont tell' },
-  ],
-  childAge: 12,
-});
+  return async () => {
+    const result = await execute({
+      messages: [
+        { role: 'adult', content: 'This is our secret' },
+        { role: 'child', content: 'Ok I wont tell' },
+      ],
+      childAge: 12,
+    });
 
-// Per-message breakdown (optional, returned on conversation-aware endpoints)
-result.message_analysis?.forEach(m => {
-  console.log(`Message ${m.message_index}: risk=${m.risk_score}, flags=${m.flags}, summary=${m.summary}`);
-});
+    console.log('Risk:', result.grooming_risk);
+    console.log('Action:', result.recommended_action);
+
+    // Per-message breakdown (omitted in verdictOnly mode)
+    result.message_analysis?.forEach((m) => {
+      console.log(`Message ${m.message_index}: risk=${m.risk_score}, flags=${m.flags}`);
+    });
+  };
+}
 ```
 
 #### useDetectUnsafe
@@ -161,11 +202,15 @@ result.message_analysis?.forEach(m => {
 ```tsx
 import { useDetectUnsafe } from '@tuteliq/react-native';
 
-const { execute } = useDetectUnsafe();
+export function useUnsafeCheck() {
+  const { execute } = useDetectUnsafe();
 
-const result = await execute({ text: 'Content to check' });
-if (result.unsafe) {
-  console.log('Categories:', result.categories);
+  return async (content: string) => {
+    const result = await execute({ content });
+    if (result.unsafe) {
+      console.log('Categories:', result.categories);
+    }
+  };
 }
 ```
 
@@ -174,14 +219,39 @@ if (result.unsafe) {
 Quick analysis combining bullying and unsafe detection:
 
 ```tsx
-import { useAnalyze, RiskLevel } from '@tuteliq/react-native';
+import { useAnalyze } from '@tuteliq/react-native';
 
-const { execute } = useAnalyze();
+export function useQuickCheck() {
+  const { execute } = useAnalyze();
 
-const result = await execute({ text: 'Message to check' });
-console.log('Risk Level:', result.riskLevel);
-console.log('Risk Score:', result.riskScore);
-console.log('Summary:', result.summary);
+  return async (content: string) => {
+    const result = await execute({ content });
+    console.log('Risk level:', result.risk_level);
+    console.log('Risk score:', result.risk_score);
+    console.log('Summary:', result.summary);
+  };
+}
+```
+
+#### Fraud, harm and other detections
+
+`useDetectSocialEngineering`, `useDetectAppFraud`, `useDetectRomanceScam`, `useDetectMuleRecruitment`, `useDetectGamblingHarm`, `useDetectCoerciveControl`, `useDetectVulnerabilityExploitation`, `useDetectRadicalisation`, `useDetectDistressSignals` and `useDetectTFGBV` all take the same input and return the same result shape:
+
+```tsx
+import { useDetectDistressSignals } from '@tuteliq/react-native';
+
+export function useDistressCheck() {
+  const { execute } = useDetectDistressSignals();
+
+  return async (content: string) => {
+    const result = await execute({ content, context: { ageGroup: '13-15' } });
+    if (result.detected) {
+      console.log('Level:', result.level);
+      console.log('Categories:', result.categories.map((c) => c.tag));
+      console.log('Action:', result.recommended_action);
+    }
+  };
+}
 ```
 
 #### useAnalyzeEmotions
@@ -189,27 +259,37 @@ console.log('Summary:', result.summary);
 ```tsx
 import { useAnalyzeEmotions } from '@tuteliq/react-native';
 
-const { execute } = useAnalyzeEmotions();
+export function useEmotionCheck() {
+  const { execute } = useAnalyzeEmotions();
 
-const result = await execute({ text: 'Im so stressed about everything' });
-console.log('Emotions:', result.dominantEmotions);
-console.log('Trend:', result.trend);
+  return async () => {
+    const result = await execute({ content: 'Im so stressed about everything' });
+    console.log('Emotions:', result.dominant_emotions);
+    console.log('Trend:', result.trend);
+  };
+}
 ```
 
 #### useGetActionPlan
 
+`audience` is `'child'`, `'parent'` or `'platform'`.
+
 ```tsx
-import { useGetActionPlan, Audience, Severity } from '@tuteliq/react-native';
+import { useGetActionPlan } from '@tuteliq/react-native';
 
-const { execute } = useGetActionPlan();
+export function useActionPlan() {
+  const { execute } = useGetActionPlan();
 
-const plan = await execute({
-  situation: 'Someone is spreading rumors about me',
-  childAge: 12,
-  audience: Audience.Child,
-  severity: Severity.Medium,
-});
-console.log('Steps:', plan.steps);
+  return async () => {
+    const plan = await execute({
+      situation: 'Someone is spreading rumors about me',
+      childAge: 12,
+      audience: 'child',
+      severity: 'medium',
+    });
+    console.log('Steps:', plan.steps);
+  };
+}
 ```
 
 #### useGenerateReport
@@ -217,78 +297,157 @@ console.log('Steps:', plan.steps);
 ```tsx
 import { useGenerateReport } from '@tuteliq/react-native';
 
-const { execute } = useGenerateReport();
+export function useIncidentReport() {
+  const { execute } = useGenerateReport();
 
-const report = await execute({
-  messages: [
-    { sender: 'user1', content: 'Threatening message' },
-    { sender: 'child', content: 'Please stop' },
-  ],
-  childAge: 14,
-});
-console.log('Summary:', report.summary);
-```
-
-#### useVerifyAge (Beta)
-
-Age verification using document scanning, biometric analysis, or both. Requires Pro tier ($99/mo) or higher. Costs 5 credits per request.
-
-```tsx
-import { useVerifyAge } from '@tuteliq/react-native';
-
-function AgeGate() {
-  const { verify, result, loading } = useVerifyAge();
-
-  const handleVerify = async () => {
-    const res = await verify({
-      document: { uri: documentUri, type: 'image/jpeg' },
-      selfie: { uri: selfieUri, type: 'image/jpeg' },
-      method: 'combined', // 'document' | 'biometric' | 'combined'
+  return async () => {
+    const report = await execute({
+      messages: [
+        { sender: 'user1', content: 'Threatening message' },
+        { sender: 'child', content: 'Please stop' },
+      ],
+      childAge: 14,
     });
-
-    console.log(res.verified);       // true
-    console.log(res.estimated_age);  // 15
-    console.log(res.age_range);      // "13-15"
-    console.log(res.is_minor);       // true
-    console.log(res.confidence);     // 0.97
+    console.log('Summary:', report.summary);
+    console.log('Next steps:', report.recommended_next_steps);
   };
 }
 ```
 
-#### useVerifyIdentity (Beta)
+#### useBatch
 
-Identity verification with document authentication and liveness detection. Requires Business tier ($349/mo) or higher. Costs 10 credits per request.
+Analyze up to 50 items in one request:
 
 ```tsx
-import { useVerifyIdentity } from '@tuteliq/react-native';
+import { useBatch } from '@tuteliq/react-native';
 
-function IdentityCheck() {
-  const { verify, result, loading } = useVerifyIdentity();
+export function useBatchCheck() {
+  const { execute } = useBatch();
 
-  const handleVerify = async () => {
-    const res = await verify({
-      document: { uri: documentUri, type: 'image/jpeg' },
-      selfie: { uri: selfieUri, type: 'image/jpeg' },
+  return async () => {
+    const result = await execute({
+      items: [
+        { type: 'bullying', content: 'first message', external_id: 'msg_1' },
+        { type: 'unsafe', content: 'second message', external_id: 'msg_2' },
+      ],
     });
-
-    console.log(res.verified);               // true
-    console.log(res.match_score);            // 0.98
-    console.log(res.liveness_passed);        // true
-    console.log(res.document_authenticated); // true
-    console.log(res.is_minor);              // false
+    console.log('Succeeded:', result.summary.successful, 'Failed:', result.summary.failed);
   };
 }
 ```
+
+#### Synthetic content
+
+```tsx
+import { useDetectSyntheticText } from '@tuteliq/react-native';
+
+export function useSyntheticTextCheck() {
+  const { execute } = useDetectSyntheticText();
+
+  return async (content: string) => {
+    const result = await execute({ content });
+    console.log('Classification:', result.classification);
+    console.log('Confidence:', result.confidence);
+  };
+}
+```
+
+`useDetectSyntheticImage`, `useDetectSyntheticAudio` and `useDetectSyntheticVideo` take a `file` and a `filename` the same way.
+
+### Verification
+
+Age and identity verification is session based. You create a session, open its URL so the user can complete the flow (document capture, liveness and selfie) in the hosted web UI, then read the outcome from the session or from the `verification.completed` webhook.
+
+```tsx
+import React from 'react';
+import { Button, Linking } from 'react-native';
+import {
+  useCreateVerificationSession,
+  useGetVerificationSession,
+  VerificationMode,
+  VerificationSessionStatus,
+} from '@tuteliq/react-native';
+
+export function AgeGate() {
+  const createSession = useCreateVerificationSession();
+  const session = useGetVerificationSession();
+
+  const start = async () => {
+    const created = await createSession.execute({
+      mode: VerificationMode.AGE,
+      auto_capture: true, // Optional, default true
+    });
+    await Linking.openURL(created.url);
+  };
+
+  const check = async () => {
+    if (!createSession.data) return;
+    const status = await session.execute(createSession.data.session_id);
+
+    if (status.status === VerificationSessionStatus.COMPLETED && status.result) {
+      console.log('Decision:', status.result.status); // 'verified' | 'failed' | 'needs_review'
+      console.log('Minor:', status.result.is_minor);
+      console.log('Face match:', status.result.face_match?.match_score);
+    }
+  };
+
+  return (
+    <>
+      <Button title="Verify my age" onPress={start} disabled={createSession.loading} />
+      <Button title="Check result" onPress={check} disabled={session.loading} />
+    </>
+  );
+}
+```
+
+- `mode` is `VerificationMode.AGE` or `VerificationMode.IDENTITY`.
+- `chip_policy` (`ChipPolicy.OPTIONAL`, `REQUIRED` or `INSTEAD_OF_PHOTO`) sets how a passport or ID card chip read counts as document evidence.
+- `auto_capture` sets whether the web UI takes the document photo itself once the document is framed, steady and sharp.
+- Session `status` is one of `pending`, `in_progress`, `document_required`, `completed`, `failed` or `expired`. A cancelled session (`useCancelVerificationSession`) reads as `expired`.
+- `face_match.match_score` (0 to 1) shows how strongly the selfie matches the document photo; `matched` is true above 0.5.
+- The extracted document fields, `date_of_birth`, `failure_reasons` and `capture` are released once, on the first read after the session finishes. Store them then, or use the webhook.
+- Session creation is never retried automatically, so a lost response cannot create a second session.
+
+See the [verification docs](https://docs.tuteliq.ai) for plans and pricing.
+
+### Incidents
+
+```tsx
+import { useListIncidents, useReviewIncident } from '@tuteliq/react-native';
+
+export function useModerationQueue() {
+  const incidents = useListIncidents();
+  const review = useReviewIncident();
+
+  const load = () => incidents.execute({ status: 'new', limit: 20 });
+
+  const dismiss = (incidentId: string) =>
+    review.execute({
+      incidentId,
+      input: {
+        action: 'dismiss',
+        reason_code: 'false_positive',
+        moderator_external_id: 'moderator_42',
+      },
+    });
+
+  return { incidents: incidents.data?.incidents ?? [], load, dismiss };
+}
+```
+
+`useBatchReviewIncidents` applies one review to up to 100 incidents. `useGetIncidentsOverview` and `useGetIncidentTrends` return counts for dashboards.
 
 ### Voice Streaming
 
 Real-time voice analysis with the `useVoiceStream` hook:
 
 ```tsx
+import React from 'react';
+import { Button } from 'react-native';
 import { useVoiceStream } from '@tuteliq/react-native';
 
-function VoiceMonitor() {
-  const { isConnected, start, stop, sendAudio } = useVoiceStream({
+export function VoiceMonitor() {
+  const { isConnected, start, stop } = useVoiceStream({
     config: { intervalSeconds: 10, analysisTypes: ['bullying', 'unsafe'] },
     handlers: {
       onReady: (e) => console.log('Session ready:', e.session_id),
@@ -307,23 +466,21 @@ function VoiceMonitor() {
 }
 ```
 
+Send audio chunks with `sendAudio(data)` while connected.
+
 ### Direct Client Access
 
-For advanced use cases, access the client directly:
+For anything without a hook, use the client directly:
 
 ```tsx
 import { useTuteliqClient } from '@tuteliq/react-native';
 
-function MyComponent() {
+export function usePolicyRules() {
   const { client } = useTuteliqClient();
 
-  const customAnalysis = async () => {
-    const result = await client.detectBullying({
-      text: 'Message',
-      externalId: 'msg_123',
-      metadata: { userId: 'user_456' },
-    });
-    return result;
+  return async () => {
+    const { rules } = await client.listPolicyRules();
+    return rules;
   };
 }
 ```
@@ -332,18 +489,26 @@ function MyComponent() {
 
 ## Tracking Fields
 
-All methods support `externalId` and `metadata` for request correlation:
+Requests accept `external_id`, `customer_id` and `metadata` for correlation. They are echoed back in the response:
 
 ```tsx
-const result = await execute({
-  text: 'Message to check',
-  externalId: 'msg_12345',
-  metadata: { userId: 'usr_abc', sessionId: 'sess_xyz' },
-});
+import { useDetectBullying } from '@tuteliq/react-native';
 
-// Echoed back in response
-console.log(result.externalId);  // "msg_12345"
-console.log(result.metadata);    // { userId: "usr_abc", ... }
+export function useTrackedCheck() {
+  const { execute } = useDetectBullying();
+
+  return async () => {
+    const result = await execute({
+      content: 'Message to check',
+      external_id: 'msg_12345',
+      customer_id: 'cust_abc',
+      metadata: { sessionId: 'sess_xyz' },
+    });
+
+    console.log(result.external_id); // "msg_12345"
+    console.log(result.metadata); // { sessionId: "sess_xyz" }
+  };
+}
 ```
 
 ---
@@ -351,6 +516,8 @@ console.log(result.metadata);    // { userId: "usr_abc", ... }
 ## Error Handling
 
 ```tsx
+import React from 'react';
+import { Text } from 'react-native';
 import {
   useAnalyze,
   AuthenticationError,
@@ -358,12 +525,12 @@ import {
   ValidationError,
 } from '@tuteliq/react-native';
 
-function MyComponent() {
+export function CheckStatus() {
   const { execute, error } = useAnalyze();
 
   const handleCheck = async () => {
     try {
-      const result = await execute({ text: 'test' });
+      await execute({ content: 'test' });
     } catch (err) {
       if (err instanceof AuthenticationError) {
         console.log('Invalid API key');
@@ -379,6 +546,8 @@ function MyComponent() {
   if (error) {
     return <Text>Error: {error.message}</Text>;
   }
+
+  return <Text onPress={handleCheck}>Check</Text>;
 }
 ```
 
@@ -389,7 +558,7 @@ function MyComponent() {
 ```tsx
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, Alert, StyleSheet } from 'react-native';
-import { TuteliqProvider, useAnalyze, RiskLevel } from '@tuteliq/react-native';
+import { TuteliqProvider, useAnalyze, isActionable } from '@tuteliq/react-native';
 
 function ChatScreen() {
   const [message, setMessage] = useState('');
@@ -399,21 +568,19 @@ function ChatScreen() {
     if (!message.trim()) return;
 
     try {
-      const result = await execute({ text: message });
+      const result = await execute({ content: message });
 
-      if (result.riskLevel === RiskLevel.Critical || result.riskLevel === RiskLevel.High) {
-        Alert.alert(
-          'Message Blocked',
-          result.summary,
-          [{ text: 'OK', onPress: () => setMessage('') }]
-        );
+      if (isActionable(result.recommended_action)) {
+        Alert.alert('Message Blocked', result.summary, [
+          { text: 'OK', onPress: () => setMessage('') },
+        ]);
         return;
       }
 
       // Safe to send
       console.log('Sending message:', message);
       setMessage('');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to check message');
     }
   };
@@ -430,7 +597,7 @@ function ChatScreen() {
       <Button title={loading ? 'Checking...' : 'Send'} onPress={handleSend} disabled={loading} />
       {data && (
         <Text style={styles.status}>
-          Last check: {data.riskLevel} (score: {data.riskScore.toFixed(2)})
+          Last check: {data.risk_level} (score: {data.risk_score.toFixed(2)})
         </Text>
       )}
     </View>
@@ -439,7 +606,7 @@ function ChatScreen() {
 
 export default function App() {
   return (
-    <TuteliqProvider apiKey={process.env.TUTELIQ_API_KEY!}>
+    <TuteliqProvider apiKey="your-api-key">
       <ChatScreen />
     </TuteliqProvider>
   );
@@ -458,34 +625,30 @@ const styles = StyleSheet.create({
 
 ### Message Batching
 
-The **bullying** and **unsafe content** methods analyze a single `text` field per request. If your app receives messages one at a time, concatenate a **sliding window of recent messages** into one string before calling the API. Single words or short fragments lack context for accurate detection and can be exploited to bypass safety filters.
+The **bullying** and **unsafe content** methods analyze a single `content` string per request. If your app receives messages one at a time, join a **sliding window of recent messages** into one string before calling the API. Single words or short fragments lack the context needed for accurate detection.
 
-```typescript
-// Bad — each message analyzed in isolation, easily evaded
-for (const msg of messages) {
-  await client.detectBullying({ text: msg });
+```tsx
+import { useDetectBullying } from '@tuteliq/react-native';
+
+export function useWindowedCheck(recentMessages: string[]) {
+  const { execute } = useDetectBullying();
+
+  // Recent messages analyzed together, not one at a time
+  return () => execute({ content: recentMessages.slice(-10).join(' ') });
 }
-
-// Good — recent messages analyzed together
-const window = recentMessages.slice(-10).join(' ');
-await client.detectBullying({ text: window });
 ```
 
 The **grooming** method already accepts a `messages[]` array and analyzes the full conversation in context.
-
-### PII Redaction
-
-Enable `PII_REDACTION_ENABLED=true` on your Tuteliq API to automatically strip emails, phone numbers, URLs, social handles, IPs, and other PII from detection summaries and webhook payloads. The original text is still analyzed in full — only stored outputs are scrubbed.
 
 ---
 
 ## Supported Languages
 
-Tuteliq supports **27 languages** with automatic detection — no configuration required.
+Tuteliq supports **32 languages** with automatic detection, no configuration required.
 
-**English** (stable) and **26 beta languages**: Spanish, Portuguese, Ukrainian, Swedish, Norwegian, Danish, Finnish, German, French, Dutch, Polish, Italian, Turkish, Romanian, Greek, Czech, Hungarian, Bulgarian, Croatian, Slovak, Lithuanian, Latvian, Estonian, Slovenian, Maltese, and Irish.
+**English** (stable) and **31 beta languages**: Spanish, Portuguese, Ukrainian, Swedish, Norwegian, Danish, Finnish, German, French, Dutch, Polish, Italian, Turkish, Romanian, Greek, Czech, Hungarian, Bulgarian, Croatian, Slovak, Lithuanian, Latvian, Estonian, Slovenian, Maltese, Irish, Chinese, Japanese, Korean, Arabic and Russian.
 
-All 24 EU official languages + Ukrainian, Norwegian, and Turkish. Each language includes culture-specific safety guidelines covering local slang, grooming patterns, self-harm coded vocabulary, and filter evasion techniques.
+All 24 EU official languages, plus Ukrainian, Norwegian, Turkish, Chinese, Japanese, Korean, Arabic and Russian. Each language includes culture-specific safety guidelines covering local slang, grooming patterns and self-harm coded vocabulary.
 
 See the [Language Support docs](https://docs.tuteliq.ai/languages) for details.
 
@@ -506,9 +669,9 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## Get Certified — Free
+## Get Certified for Free
 
-Tuteliq offers a **free certification program** for anyone who wants to deepen their understanding of online child safety. Complete a track, pass the quiz, and earn your official Tuteliq certificate — verified and shareable.
+Tuteliq offers a **free certification program** for anyone who wants to deepen their understanding of online child safety. Complete a track, pass the quiz, and earn your official Tuteliq certificate, verified and shareable.
 
 **Three tracks available:**
 
@@ -520,7 +683,7 @@ Tuteliq offers a **free certification program** for anyone who wants to deepen t
 
 **Start here →** [tuteliq.ai/certify](https://tuteliq.ai/certify)
 
-- 100% Free — no login required
+- 100% Free, no login required
 - Verifiable certificate on completion
 - Covers grooming recognition, sextortion, cyberbullying, regulatory obligations (KOSA, EU DSA), and more
 
@@ -533,13 +696,13 @@ Before you decide to contribute or sponsor, read these numbers. They are not pro
 - **302 million** children are victims of online sexual exploitation and abuse every year. That is **10 children every second**. *(Childlight / University of Edinburgh, 2024)*
 - **1 in 8** children globally have been victims of non-consensual sexual imagery in the past year. *(Childlight, 2024)*
 - **370 million** girls and women alive today experienced rape or sexual assault in childhood. An estimated **240–310 million** boys and men experienced the same. *(UNICEF, 2024)*
-- **29.2 million** incidents of suspected child sexual exploitation were reported to NCMEC's CyberTipline in 2024 alone — containing **62.9 million files** (images, videos). *(NCMEC, 2025)*
-- **546,000** reports of online enticement (adults grooming children) in 2024 — a **192% increase** from the year before. *(NCMEC, 2025)*
+- **29.2 million** incidents of suspected child sexual exploitation were reported to NCMEC's CyberTipline in 2024 alone, containing **62.9 million files** (images, videos). *(NCMEC, 2025)*
+- **546,000** reports of online enticement (adults grooming children) in 2024, a **192% increase** from the year before. *(NCMEC, 2025)*
 - **1,325% increase** in AI-generated child sexual abuse material reports between 2023 and 2024. The technology that should protect children is being weaponized against them. *(NCMEC, 2025)*
 - **100 sextortion reports per day** to NCMEC. Since 2021, at least **36 teenage boys** have taken their own lives because they were victimized by sextortion. *(NCMEC, 2025)*
 - **84%** of reports resolve outside the United States. This is not an American problem. This is a **global emergency**. *(NCMEC, 2025)*
 
-End-to-end encryption is making platforms blind. In 2024, platforms reported **7 million fewer incidents** than the year before — not because abuse stopped, but because they can no longer see it. The tools that catch known images are failing. The systems that rely on human moderators are overwhelmed. The technology to detect behavior — grooming patterns, escalation, manipulation — in real-time text conversations **exists right now**. It is running at [api.tuteliq.ai](https://api.tuteliq.ai).
+End-to-end encryption is making platforms blind. In 2024, platforms reported **7 million fewer incidents** than the year before, not because abuse stopped, but because they can no longer see it. The tools that catch known images are failing. The systems that rely on human moderators are overwhelmed. The technology to detect behavior (grooming patterns, escalation, manipulation) in real-time text conversations **exists right now**. It is running at [api.tuteliq.ai](https://api.tuteliq.ai).
 
 The question is not whether this technology is possible. The question is whether we build the company to put it everywhere it needs to be.
 
@@ -547,7 +710,7 @@ The question is not whether this technology is possible. The question is whether
 
 We have the technology. We need the support.
 
-If this mission matters to you, consider [sponsoring our open-source work](https://github.com/sponsors/Tuteliq) so we can keep building the tools that protect children — and keep them free and accessible for everyone.
+If this mission matters to you, consider [sponsoring our open-source work](https://github.com/sponsors/Tuteliq) so we can keep building the tools that protect children, and keep them free and accessible for everyone.
 
 ---
 

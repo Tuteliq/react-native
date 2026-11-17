@@ -1,31 +1,38 @@
 # Tuteliq React Native SDK
 
-> Official React Native SDK for Tuteliq — AI-powered child safety API with hooks for mobile apps.
+> Official React Native SDK for Tuteliq, the AI-powered child safety API, with a provider and React hooks for mobile apps.
 
 ## What is this?
-A React Native library for the Tuteliq child safety API. Detect bullying, grooming, self-harm, and other harmful content with React hooks. Works on iOS and Android.
+A React Native library for the Tuteliq child safety API. Detect bullying, grooming, self-harm, fraud and other harmful content with React hooks. Works on iOS and Android. It wraps the Tuteliq Node SDK (@tuteliq/sdk) and re-exports all of its client, enums, errors and types.
 
 ## Install
 npm install @tuteliq/react-native
 
 ## Quick Start
-import { Tuteliq } from '@tuteliq/react-native'
-import Config from 'react-native-config'
-const tuteliq = new Tuteliq({ apiKey: Config.TUTELIQ_API_KEY })
-const result = await tuteliq.detectUnsafe({ text: 'content to check', ageGroup: '13-15' })
+import { TuteliqProvider, useAnalyze, isActionable } from '@tuteliq/react-native'
+
+// Wrap the app once
+<TuteliqProvider apiKey="your-api-key" options={{ timeout: 30000, retries: 3 }}>
+  <App />
+</TuteliqProvider>
+
+// In a component
+const { execute, loading } = useAnalyze()
+const result = await execute({ content: 'content to check' })
+if (isActionable(result.recommended_action)) { /* hold the message for review */ }
 
 ## Key Features
-- React hooks for easy integration
+- A useX() hook for each detection, media, verification, incident, webhook, usage and privacy method, each returning { data, loading, error, execute, reset }
+- useTuteliqClient() for direct access to every client method
 - iOS and Android support
-- All 20+ Tuteliq API endpoints
-- 16+ detection categories (KOSA compliant)
-- Age group calibration
+- Safety, fraud and harm detection with age group calibration
+- Synthetic content detection for text, image, audio and video
+- Session-based age and identity verification (useCreateVerificationSession, useGetVerificationSession)
+- Incident listing and moderator review
 - TypeScript support
-- Age Verification (Beta) — POST /v1/verification/age — Pro tier+, 5 credits
-- Identity Verification (Beta) — POST /v1/verification/identity — Business tier+, 10 credits
 
 ## Supported Languages
-27 languages: English (stable), Spanish, Portuguese, Ukrainian, Swedish, Norwegian, Danish, Finnish, German, French, Dutch, Polish, Italian, Turkish, Romanian, Greek, Czech, Hungarian, Bulgarian, Croatian, Slovak, Lithuanian, Latvian, Estonian, Slovenian, Maltese, Irish (beta). Auto-detected, no configuration needed.
+32 languages: English (stable), Spanish, Portuguese, Ukrainian, Swedish, Norwegian, Danish, Finnish, German, French, Dutch, Polish, Italian, Turkish, Romanian, Greek, Czech, Hungarian, Bulgarian, Croatian, Slovak, Lithuanian, Latvian, Estonian, Slovenian, Maltese, Irish, Chinese, Japanese, Korean, Arabic, Russian (beta). Auto-detected, no configuration needed.
 
 ## Links
 - Website: https://tuteliq.ai
